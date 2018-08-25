@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/andriepu/liburnasional.svg?branch=master)](https://travis-ci.org/andriepu/liburnasional) [![Coverage Status](https://coveralls.io/repos/github/andriepu/liburnasional/badge.svg?branch=master)](https://coveralls.io/github/andriepu/liburnasional?branch=master)
+
 # Liburnasional 
 > Indonesian public holidays checker
 
