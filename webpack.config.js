@@ -4,7 +4,7 @@ const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const { NODE_ENV: ENV } = process.env;
 const isProduction = ENV === 'production';
 
-const libraryName = 'LiburNasional';
+const libraryName = 'liburnasional';
 
 const config = {
   entry: `${__dirname}/src/liburnasional.js`,

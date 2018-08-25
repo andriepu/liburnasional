@@ -1,55 +1,63 @@
 const chai = require('chai');
 const random = require('lodash.random');
 
-const { INDO_OFFSET_GMT } = require('../src/constants');
-const LiburNasional = require('../src/liburnasional');
+const libur = require('../src/liburnasional');
 
 chai.should();
 
-const liburNasional = new LiburNasional();
-
 describe('#Liburan', () => {
-  before(async () => {
-    await liburNasional.initialize();
-  });
+  let currentYear;
 
-  it('should be able to crawl data', () => {
-    Object.keys(liburNasional.$holidays).length.should.to.be.above(0);
+  before(async () => {
+    currentYear = (new Date()).getFullYear();
+    await libur.initialize();
   });
 
   it('should be able to validate some commons national holiday', () => {
-    const currentYear = (new Date()).getFullYear();
-
-    const ISOFormat = `${currentYear}-05-31T17:00:00.000Z`; // Hari Lahir Pancasila
-    const randomTime = (() => {
-      const t = new Date(`${currentYear}-12-24T17:00:00.000Z`); // Natal
-      t.setHours(
-        (-t.getTimezoneOffset() / 60) - INDO_OFFSET_GMT + random(23),
+    for (let i = 0; i < 10; i += 1) {
+      const t = new Date(`Mon, 24 Dec ${currentYear} 17:00:00 GMT`); // Natal
+      t.setUTCHours(
+        t.getUTCHours() + random(23),
         random(59),
         random(59),
         0,
       );
-      return t.toISOString();
-    })();
 
-    liburNasional.isHoliday(ISOFormat).should.be.true;
-    liburNasional.isHoliday(randomTime).should.be.true;
+      const randomTime = t.toUTCString();
+
+      libur.isHoliday(randomTime).should.be.true;
+    }
+
+    const UTCStart = `Thu, 31 May ${currentYear} 17:00:00 GMT`; // Hari Lahir Pancasila
+    const UTCEnd = `Thu, 01 June ${currentYear} 16:59:59 GMT`; // Hari Lahir Pancasila
+    libur.isHoliday(UTCStart).should.be.true;
+    libur.isHoliday(UTCEnd).should.be.true;
   });
 
   it('should be able to validate weekends', () => {
-    const saturday = '2018-01-05T17:00:00.000Z';
-    const sunday = '2018-01-06T17:00:00.000Z';
+    const saturdayStart = `Fri, 05 Jan ${currentYear} 17:00:00 GMT`;
+    const saturdayEnd = `Sat, 06 Jan ${currentYear} 16:59:59 GMT`;
 
-    liburNasional.isHoliday(sunday).should.be.true;
-    liburNasional.isHoliday(saturday).should.be.true;
+    const sundayStart = `Sat, 06 Jan ${currentYear} 17:00:00 GMT`;
+    const sundayEnd = `Sun, 07 Jan ${currentYear} 16:59:59 GMT`;
+
+    libur.isHoliday(sundayStart).should.be.true;
+    libur.isHoliday(sundayEnd).should.be.true;
+
+    libur.isHoliday(saturdayStart).should.be.true;
+    libur.isHoliday(saturdayEnd).should.be.true;
   });
 
   it('should be able to validate non-holidays', () => {
-    const nonHoliday = new Date('2018-01-07T17:00:00.000Z');
+    const nonHolidayStart = new Date('Sun, 07 Jan 2018 17:00:00 GMT');
+    const nonHolidayEnd = new Date('Mon, 08 Jan 2018 16:59:59 GMT');
 
     for (let i = 0; i < 5; i += 1) {
-      liburNasional.isHoliday(nonHoliday.toISOString()).should.be.false;
-      nonHoliday.setHours(2);
+      libur.isHoliday(nonHolidayStart.toUTCString()).should.be.false;
+      libur.isHoliday(nonHolidayEnd.toUTCString()).should.be.false;
+
+      nonHolidayStart.setHours(24);
+      nonHolidayEnd.setHours(24);
     }
   });
 });
